@@ -76,11 +76,10 @@ const ImageContainer = () => {
   const [dropdownValue, setdropdownValue] = React.useState('');
   const [image, setImage] = useState(null)
   const [images, setImages] = useState([]);
-  const [type, setType] = useState("");
   const [resultArrived, setResultArrived] = useState(false);
   const [imagePreview, setImagePreview] = useState(false);
   const [isLoading, setisLoading] = useState(false);
-  const [fetchingType, setFetchingType] = useState(true);
+  const [response, setResponse] = useState(null)
   var intervalID = 0
 
   const handleChange = (event) => {
@@ -110,33 +109,6 @@ const ImageContainer = () => {
     </div>
   ));
 
-
-  useEffect(() => {
-    images.forEach(image => URL.revokeObjectURL(image.preview));
-  }, [images]);
-
-  const getOutput = async () => {
-    try {
-      await axios({
-        method: 'get',
-        url: 'http://127.0.0.1:8000/api/old_image',
-      }).then((response) => {
-        const data = response.data;
-        if (data.length === 0 || data === undefined) {
-          return
-        }
-        setFetchingType(false);
-        setType(data);
-        setResultArrived(true);
-        setisLoading(false);
-        console.log("Result arrived");
-        clearInterval(intervalID)
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setImagePreview(false);
@@ -144,24 +116,32 @@ const ImageContainer = () => {
     // handleToggle();
     let form_data = new FormData();
     if (images !== null && dropdownValue !== null) {
-      // console.log(images);
-      form_data.append('image', images[0])
+      console.log(images);
+      form_data.append('file', images[0])
       form_data.append('method', dropdownValue)
     }
-    let url = 'http://localhost:8000/api/old_image/';
-    axios.post(url, form_data, {
-      headers: {
-        'content-type': 'multipart/form-data'
-      }
-    })
+    fetch('https://376b-103-5-150-3.in.ngrok.io/', {
+      method: 'POST',
+      body: form_data,
+    }).then((response) => response.json()).
+      then((responseJson) => {
+        console.log("Result arrived");
+        console.log(responseJson)
+        setResponse(responseJson)
+        setResultArrived(true);
+        setisLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
 
-    intervalID = setInterval(getOutput, 1000)
+    // intervalID = setInterval(getOutput, 1000)
 
-    if (!fetchingType) {
-      clearInterval(intervalID)
+    // if (!fetchingType) {
+    //   clearInterval(intervalID)
 
-      intervalID = null
-    }
+    //   intervalID = null
+    // }
   };
 
 
@@ -243,7 +223,7 @@ const ImageContainer = () => {
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", padding: "10px 20px" }}>
-          Type {type} cervix
+          <strong>Type {response.type} cervix</strong>
 
         </div>
       </>)
