@@ -4,6 +4,9 @@
 - The tissues in the TZ are where the cancer cells generate
 - Our application classifies cervixes which is the step before cancer detection, easing the process in general.
 
+
+## Application Technical Details
+
 - Application built using React JS for the web and React Native for the mobile
 - Server built using Flask
 - Models used VGG16 and Vision Transformer (ViT)
